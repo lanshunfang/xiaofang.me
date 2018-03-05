@@ -42,7 +42,9 @@ main() {
 }
 
 initEnv(){
+	git pull
 	rm ${INDEX_TMP}
+	
 	cp ${INDEX_TPL} ${INDEX_TMP}
 	apt-get update -y
 	# install jq
