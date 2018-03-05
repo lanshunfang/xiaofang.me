@@ -183,7 +183,7 @@ getGithubReleaseAssetUploadUrl(){
 		return 
 	fi
 
-	uploadUrl=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq -e --raw-output '.uploadUrl')
+	uploadUrl=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq --raw-output '.uploadUrl | select(.!=null)')
 	if [[ -z "$uploadUrl" ]];then
 		sleep 10 
 		getGithubReleaseAssetUploadUrl ${urlPrefixOfRelease} ${currentTry}
