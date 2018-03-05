@@ -27,6 +27,8 @@ INDEX_TMP=index.html.tmp
 
 DATE=`date +%Y-%m-%d`
 
+OWNER_REPO=$( git config --get remote.origin.url | grep -Po 'https:\/\/github\.com\/\K(.*)' | sed 's#\.git##g' )
+
 main() {
 
 	initEnv
@@ -69,6 +71,8 @@ HERE_DOC
 }
 
 afterAll(){
+	# __owner_repo__
+	updateIndexTplDownloadLink __owner_repo__ ${OWNER_REPO}
 	replaceIndexHtml
 	git add .
 	git commit -m "[log] Script ran on ${DATE}"
@@ -97,9 +101,8 @@ downloadAndPush(){
 
 	initLastUpdateDate ${FILENAME}
 
-	ownerAndRepoPartOfReleasing=$( git config --get remote.origin.url | grep -Po 'https:\/\/github\.com\/\K(.*)' | sed 's#\.git##g' )
 	# delete release by tag name if any
-	urlPrefixOfRelease=https://api.github.com/repos/${ownerAndRepoPartOfReleasing}/releases
+	urlPrefixOfRelease=https://api.github.com/repos/${OWNER_REPO}/releases
 	releaseMsg="Google Chrome: ${FILENAME} ${DATE}"
 
 	if [[ ${FILESIZE} > ${FILESIZE_MIN} ]];then
@@ -258,6 +261,7 @@ updateIndexTplDownloadLink(){
 
 	sed -i "s#${PLACEHOLDER}#${LINK}#g" ${INDEX_TMP}
 }
+
 
 replaceIndexHtml() {
 	rm ${INDEX_HTML}
