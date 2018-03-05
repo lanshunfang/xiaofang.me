@@ -1,0 +1,26 @@
+{
+  "name": "xiaofang.me",
+  "version": "1.0.0",
+  "description": "Paul Lan's website and tools",
+  "main": "xiaofang.me.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lanshunfang/xiaofang.me.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lanshunfang/xiaofang.me/issues"
+  },
+  "homepage": "https://github.com/lanshunfang/xiaofang.me#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "wdio-firefox-profile-service": "0.0.1",
+    "wdio-jasmine-framework": "^0.2.13",
+    "wdio-json-reporter": "^0.1.0",
+    "wdio-selenium-standalone-service": "0.0.7"
+  }
+}

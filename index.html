@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0"/>
+    <title>小方网站微信中继...</title>
+    <style>
+        #wechat_iframe {
+
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+
+        }
+
+        #loading {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: #fff;
+            opacity: .9;
+            transition: all 2s;
+        }
+
+
+
+        #loading p.default {
+            margin-bottom: 0;
+        }
+
+        #loading .loading-longer {
+            color: #ff6708
+        }
+
+        #loading .loading-connected {
+            color: #0061b9
+        }
+
+        #wechat_img, #wechat_summary {
+            height: 1px;
+            width: 1px;
+            overflow: hidden;
+            opacity: .1;
+            position: fixed;
+            bottom: 0;
+            left: 0
+        }
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="wechat_img"><img id="featured" width="800" height="600"
+                          src="//www.xiaofang.me/wp-content/uploads/2014/11/unnamed.png"/></div>
+<div id="wechat_summary">小方的博客分享 xiaofang.me</div>
+<iframe id="wechat_iframe" height="100%" width="100%" src="//www.xiaofang.me/">
+    <p>你的浏览器不支持本定点清除；请手工点击 <a href="//www.xiaofang.me/" class=""></a></p>
+</iframe>
+
+<h1 id="loading">
+    <p class="default">正在载入小方 xiaofang.me 网站... loading xiaofang.me...</p>
+    <p class="loading-connected hide">小方网站已经连接成功，正在加载完整数据....</p>
+    <p class="loading-longer hide">不好意思，好像加载时间略长一些，请再耐心等等。</p>
+    <p class="loading-failure hide">
+        看来 xiaofang.me 临时出现了些问题，或者你的网络环境有部分问题。
+    </p>
+</h1>
+<script>
+    var doc = document;
+    var win = window;
+    var lastUrlPosted;
+
+    var loading = doc.querySelector('#loading');
+    var loadingDefault = doc.querySelector('#loading .default');
+    var connected = doc.querySelector('#loading .loading-connected');
+    var loadingLonger = doc.querySelector('#loading .loading-longer');
+    var loadingFailure = doc.querySelector('#loading .loading-failure');
+    var iframe = doc.querySelector('#wechat_iframe');
+
+    var intervalNotifyId = setInterval(ensureUrlUpdated, 500);
+
+    win.addEventListener('message', function (e) {
+        var message = e.data;
+
+        clearTimeout(intervalNotifyId);
+        setTimeout(ensureUrlUpdated, 100);
+
+        if (message.msgTitle === 'connected') {
+            clearTimeout(window.globalLoadingTimeout);
+            loadingDefault.style.display = 'none';
+            loadingLonger.style.display = 'none';
+
+        }
+
+        if (message.msgTitle) {
+
+            return
+        }
+
+        clearTimeout(window.globalLoadingTimeout);
+        loadingLonger.style.display = 'none';
+
+        loading.style.transform = 'translate(0px, -100px)';
+        loading.style.opacity = 0.5
+        setTimeout(function () {
+            loading.style.display = 'none';
+        }, 1000);
+        var title = message.title;
+        var description = message.description;
+
+        var url = lastUrlPosted = message.url;
+        if (!url) {
+            console.error('[ERROR] url does not exist');
+            return
+        }
+
+        if (message.isReplaceHref) {
+            location.href = url.replace(/^\/\//g, 'http://');
+        } else {
+            doc.title = title;
+            location.hash = encodeURI(url.replace('#', '--XF--'));
+            if (message.imgSrc) {
+                doc.getElementById('featured').src = message.imgSrc;
+            }
+            if (description) {
+                doc.getElementById('wechat_summary').innerText = description;
+            }
+        }
+
+    });
+
+    doc.addEventListener("DOMContentLoaded", function () {
+        updateIFrameByUrl();
+        updateLoading()
+
+    });
+
+    function updateIFrameByUrl() {
+
+        var hash = location.hash;
+        if (hash.length > 2) {
+            var url = decodeURI(hash.slice(1)).replace('--XF--', '#');
+            if (iframe.src != url && lastUrlPosted !== url) {
+                iframe.src = url;
+            }
+        }
+
+    }
+
+    function updateLoading() {
+        window.globalLoadingTimeout = setTimeout(function () {
+            document.querySelector('#loading .default').style.display = 'none';
+            loadingLonger.style.display = 'block';
+
+            setTimeout(function () {
+                loadingLonger.style.display = 'none';
+
+            }, 8000)
+        }, 7000)
+    }
+
+    function ensureUrlUpdated() {
+        debugger
+        var iframeWin = iframe.contentWindow;
+
+        if (!iframeWin) return;
+
+        iframeWin.postMessage({
+            type: 'wechat_unblocker'
+        }, '*');
+
+    }
+
+
+</script>
+
+</body>
+</html>
