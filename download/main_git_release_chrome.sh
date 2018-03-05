@@ -97,7 +97,7 @@ downloadAndPush(){
 
 	initLastUpdateDate ${FILENAME}
 
-	ownerAndRepoPartOfReleasing=$( git config --get remote.origin.url | grep -Po 'https:\/\/github\.com\/\K(.*)' )
+	ownerAndRepoPartOfReleasing=$( git config --get remote.origin.url | grep -Po 'https:\/\/github\.com\/\K(.*)' | sed 's#\.git##g' )
 	# delete release by tag name if any
 	urlPrefixOfRelease=https://api.github.com/repos/${ownerAndRepoPartOfReleasing}/releases
 	releaseMsg="Google Chrome: ${FILENAME} ${DATE}"
@@ -125,7 +125,9 @@ downloadAndPush(){
 				echo "[INFO] Waiting 10s for Github for syncronising DB for next step"
 				sleep 10
 			else
-				echo "[ERROR] $isCurlErr"
+				echo "[ERROR] Failed on trying to create git release with name: ${RELEASE_RENAMED} at url: ${urlPrefixOfRelease}"
+				echo "[ERROR] Error Info: $isCurlErr"
+				exit 26
 			fi
 			
 			echo "[INFO] Upload assets to tag name: ${RELEASE_RENAMED}, filename: ${FILENAME}.zip"
