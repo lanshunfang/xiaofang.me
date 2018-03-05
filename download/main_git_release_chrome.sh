@@ -206,7 +206,7 @@ getReleaseAssetLink(){
 		return 
 	fi
 
-	releaseAssetLink=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq '.assets | .[] | select(.name=="'${FILENAME}.zip'") | .browser_download_url')
+	releaseAssetLink=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq --raw-output '.assets | .[] | select(.name=="'${FILENAME}.zip'") | .browser_download_url')
         releaseAssetLink=$(echo $releaseAssetLink | sed 's#"##g')
 
         if [[ -z "${releaseAssetLink}" ]];then
