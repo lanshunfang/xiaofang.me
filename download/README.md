@@ -12,7 +12,7 @@ export GITHUB_AUTH_TOKEN=*****
 ```
 * Set up a VM server outside China
 * Fork this repo, then clone it down to the VM
-* Run `_update_github_io_download.sh` (relatively as download/_update_github_io_download.sh)
+* Run `main_git_release_chrome.sh` (relatively as download/main_git_release_chrome.sh)
 ** If you run it with `root` or `sudo -E`, it will add itself as crontab job, so that it could be automationcally run repeatly.
 * Open https://github.com/:owner/xiaofang.me/releases
 ** Say [https://github.com/lanshunfang/xiaofang.me/releases](https://github.com/lanshunfang/xiaofang.me/releases)

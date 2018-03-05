@@ -151,18 +151,40 @@ downloadAndPush(){
 		echo "[ERROR] The file size of ${FILENAME} is ${FILESIZE} which is smaller than expected (mininum: ${FILESIZE_MIN}). Skip git push."
 	fi
 
-	releaseAssetLink=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq '.assets | .[] | select(.name=="'${FILENAME}.zip'") | .browser_download_url')
-	releaseAssetLink=$(echo $releaseAssetLink | sed 's#"##g')
-	if [[ -z "${releaseAssetLink}" ]];then
-		echo "[WARN] Asset download URL is not generated properly. It might be caused by github DB delay"
-		echo "[WARN] Asset download URL is not generated properly. Try rerun this script"
-	fi
+	releaseAssetLink=$(getReleaseAssetLink $urlPrefixOfRelease $FILENAME)
 	echo "[INFO] Asset ${FILENAME}.zip Download URL: ${releaseAssetLink}"
 
 	updateIndexTplDate ${FILE_DATE_PLACEHOLDER} ${FILENAME}
 	updateIndexTplDownloadLink ${FILE_DOWNLOAD_LINK_PLACEHOLDER} ${releaseAssetLink}
 	
 	sleep 5
+}
+
+getReleaseAssetLink(){
+	urlPrefixOfRelease=$1
+	FILENAME=$2
+	currentTry=$3
+
+	if [[ -z "${currentTry}" ]];then
+		currentTry=0
+	fi
+
+	if (( currentTry >= 3 ));then
+		echo "[ERROR] Download link couldn't be generated. This may be caused by github DB sync issue. Exit."
+		exit 20
+	fi
+
+	releaseAssetLink=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq '.assets | .[] | select(.name=="'${FILENAME}.zip'") | .browser_download_url')
+        releaseAssetLink=$(echo $releaseAssetLink | sed 's#"##g')
+
+        if [[ -z "${releaseAssetLink}" ]];then
+		sleep 10
+		((currentTry++))
+		getReleaseAssetLink $urlPrefixOfRelease $FILENAME ${currentTry}	
+                
+	else
+		echo $releaseAssetLink
+        fi
 }
 
 initLastUpdateDate() {
