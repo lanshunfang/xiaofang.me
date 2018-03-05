@@ -177,13 +177,17 @@ getGithubReleaseAssetUploadUrl(){
 
 	if [[ -z "${currentTry}" ]];then
 		currentTry=0
+	else 
+		((currentTry++))
 	fi
-
 	if (( currentTry >= 3 ));then
 		return 
 	fi
 
-	uploadUrl=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq --raw-output '.uploadUrl | select(.!=null)')
+	curlRes=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest)
+	(>&2 echo "[INFO] Curl response: $curlRes")
+
+	uploadUrl=$(echo $curlRes | jq --raw-output '.uploadUrl | select(.!=null)')
 	if [[ -z "$uploadUrl" ]];then
 		sleep 10 
 		getGithubReleaseAssetUploadUrl ${urlPrefixOfRelease} ${currentTry}
@@ -200,18 +204,21 @@ getReleaseAssetLink(){
 
 	if [[ -z "${currentTry}" ]];then
 		currentTry=0
+	else 
+		((currentTry++))
 	fi
 
 	if (( currentTry >= 3 ));then
 		return 
 	fi
 
-	releaseAssetLink=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq --raw-output '.assets | .[] | select(.name=="'${FILENAME}.zip'") | .browser_download_url')
+	curlRes=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest )
+	(>&2 echo "[INFO] Curl response: $curlRes")
+        releaseAssetLink=$(echo $curlRes | jq --raw-output '.assets | .[] | select(.name=="'${FILENAME}.zip'") | .browser_download_url')
         releaseAssetLink=$(echo $releaseAssetLink | sed 's#"##g')
 
         if [[ -z "${releaseAssetLink}" ]];then
 		sleep 10
-		((currentTry++))
 		getReleaseAssetLink $urlPrefixOfRelease $FILENAME ${currentTry}	
                 
 	else
