@@ -50,7 +50,7 @@ initEnv(){
 updateCronTab(){
 	cronFilePath=/etc/cron.d/${SCRIPTNAME}
 	cronScriptToEval=$(cat <<HERE_DOC
-		echo "6 6 * * 1 root ${DIR}/${SCRIPTNAME}" >  ${cronFilePath}
+		echo "6 6 * * 1,3,5 root ${DIR}/${SCRIPTNAME}" >  ${cronFilePath}
 		cat ${cronFilePath}
 		service cron restart
 HERE_DOC
