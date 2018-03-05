@@ -133,6 +133,10 @@ downloadAndPush(){
 			echo "[INFO] Upload assets to tag name: ${RELEASE_RENAMED}, filename: ${FILENAME}.zip"
 
 			uploadUrl=$(getGithubReleaseAssetUploadUrl ${urlPrefixOfRelease})
+			if [[ -z "${uploadUrl}" ]];then
+				echo "[ERROR] Asset upload link couldn't be generated. This may be caused by github DB sync issue. Try to rerun this script. Exit."
+				exit 26
+			fi
 			echo "[INFO] Upload URL: ${uploadUrl}"
 
 			isCurlErr=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -H "Content-Type: application/zip" --data-binary @${FILENAME}.zip -X POST ${uploadUrl}?name=${FILENAME}.zip&label="${releaseMsg}")
@@ -154,6 +158,10 @@ downloadAndPush(){
 	fi
 
 	releaseAssetLink=$(getReleaseAssetLink $urlPrefixOfRelease $FILENAME)
+	if [[ -z "${releaseAssetLink}" ]];then
+		echo "[ERROR] Download link couldn't be generated. This may be caused by github DB sync issue. Try to rerun this script. Exit."
+		exit 20
+	fi
 	echo "[INFO] Asset ${FILENAME}.zip Download URL: ${releaseAssetLink}"
 
 	updateIndexTplDate ${FILE_DATE_PLACEHOLDER} ${FILENAME}
@@ -172,8 +180,7 @@ getGithubReleaseAssetUploadUrl(){
 	fi
 
 	if (( currentTry >= 3 ));then
-		echo "[ERROR] Asset upload link couldn't be generated. This may be caused by github DB sync issue. Try to rerun this script. Exit."
-		exit 21
+		return 
 	fi
 
 	uploadUrl=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq --raw-output '.uploadUrl')
@@ -196,8 +203,7 @@ getReleaseAssetLink(){
 	fi
 
 	if (( currentTry >= 3 ));then
-		echo "[ERROR] Download link couldn't be generated. This may be caused by github DB sync issue. Try to rerun this script. Exit."
-		exit 20
+		return 
 	fi
 
 	releaseAssetLink=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq '.assets | .[] | select(.name=="'${FILENAME}.zip'") | .browser_download_url')
