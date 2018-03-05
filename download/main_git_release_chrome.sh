@@ -129,11 +129,11 @@ downloadAndPush(){
 			fi
 			
 			echo "[INFO] Upload assets to tag name: ${RELEASE_RENAMED}, filename: ${FILENAME}.zip"
-			upload_url=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq '.upload_url')
-			upload_url=${upload_url%\{*}
-			upload_url=$(echo $upload_url | sed 's#"##g')
-			echo "[INFO] Upload URL: ${upload_url}"
-			isCurlErr=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -H "Content-Type: application/zip" --data-binary @${FILENAME}.zip -X POST ${upload_url}?name=${FILENAME}.zip&label="${releaseMsg}")
+
+			uploadUrl=$(getGithubReleaseAssetUploadUrl ${urlPrefixOfRelease})
+			echo "[INFO] Upload URL: ${uploadUrl}"
+
+			isCurlErr=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -H "Content-Type: application/zip" --data-binary @${FILENAME}.zip -X POST ${uploadUrl}?name=${FILENAME}.zip&label="${releaseMsg}")
 			echo "[INFO] Curl Response: $isCurlErr"
 			isCurlErr=$(echo $isCurlErr | jq --raw-output 'try (.errors[] | select(.code!="already_exists")) catch ""')
 			if [[ -z "$isCurlErr" ]];then
@@ -160,6 +160,30 @@ downloadAndPush(){
 	sleep 5
 }
 
+getGithubReleaseAssetUploadUrl(){
+	urlPrefixOfRelease=$1
+
+	currentTry=$2
+
+	if [[ -z "${currentTry}" ]];then
+		currentTry=0
+	fi
+
+	if (( currentTry >= 3 ));then
+		echo "[ERROR] Asset upload link couldn't be generated. This may be caused by github DB sync issue. Try to rerun this script. Exit."
+		exit 21
+	fi
+
+	uploadUrl=$(curl -H "Authorization: token $GITHUB_AUTH_TOKEN" -X GET ${urlPrefixOfRelease}/latest | jq --raw-output '.uploadUrl')
+	if [[ -z "$uploadUrl" ]];then
+		sleep 10 
+		getGithubReleaseAssetUploadUrl ${urlPrefixOfRelease} ${currentTry}
+	fi
+        uploadUrl=${uploadUrl%\{*}
+        uploadUrl=$(echo $uploadUrl | sed 's#"##g')	
+	echo ${uploadUrl}
+}
+
 getReleaseAssetLink(){
 	urlPrefixOfRelease=$1
 	FILENAME=$2
@@ -170,7 +194,7 @@ getReleaseAssetLink(){
 	fi
 
 	if (( currentTry >= 3 ));then
-		echo "[ERROR] Download link couldn't be generated. This may be caused by github DB sync issue. Exit."
+		echo "[ERROR] Download link couldn't be generated. This may be caused by github DB sync issue. Try to rerun this script. Exit."
 		exit 20
 	fi
 
