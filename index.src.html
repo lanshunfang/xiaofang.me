@@ -111,10 +111,6 @@
         var linkPlaceholder = '--WC--';
 
 
-        [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
-            hostDiv.innerText = urlToJumpTo;
-        });
-
         win.addEventListener('message', function (e) {
             var message = e.data;
 
@@ -201,11 +197,15 @@
             if (hash.length > 2) {
                 var url = decodeURI(hash.slice(1)).replace(linkPlaceholder, '#');
                 if (iframe.src != url && lastUrlPosted !== url) {
-                    iframe.src = url;
+                    urlToJumpTo = url;
                 }
-            } else {
-                iframe.src = urlToJumpTo;
             }
+
+            iframe.src = urlToJumpTo;
+
+            [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
+                hostDiv.innerText = urlToJumpTo;
+            });
 
         }
 
