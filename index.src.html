@@ -119,13 +119,10 @@
                     hideElement(loadingDefault, loadingLonger, loadingFailure, unload);
                     showElement(connected);
 
-                    slideUpElement(loading);
-
                     setTimeout(function () {
-                        loading.style.display = 'none';
-                        connected.style.display = 'none';
-
-                    }, 1000);
+                        hideElement(connected);
+                        slideUpElement(loading);
+                    }, 500);
 
                 }
                     break;
@@ -224,8 +221,13 @@
         function slideUpElement(elem) {
             elem.style.transform = 'translate(0px, -100px)';
             elem.style.opacity = 0.5;
+            setTimeout(function () {
+                hideElement(elem)
+            }, 1000);
         }
         function slideDownElement(elem) {
+            showElement(elem);
+
             elem.style.transform = 'translate(0px, 0px)';
             elem.style.opacity = 1;
         }
