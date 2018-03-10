@@ -35,7 +35,9 @@
             updateParent();
 
             window.addEventListener("hashchange", function (event) {
-                updateParent();
+                setTimeout(function () {
+                    updateParent();
+                }, 800)
             });
 
             $('body').on('click', 'a', function (e) {
@@ -44,7 +46,9 @@
                 if (/\/\//.test(href) && !href.match(host)) {
                     updateParent(true, href);
                 } else {
-                    updateParent();
+                    setTimeout(function () {
+                        updateParent();
+                    }, 800)
                 }
             })
 
