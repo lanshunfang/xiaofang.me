@@ -48,6 +48,10 @@
         .hide {
             display: none;
         }
+        .website-host {
+            font-weight: bold;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +66,7 @@
     <p class="loading-connected hide">网站已经连接成功，正在加载完整数据....</p>
     <p class="loading-longer hide">不好意思，好像加载时间略长一些，请再耐心等等。</p>
     <p class="loading-failure hide">
-        如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"。
+        如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
     </p>
 </h1>
 <script>
@@ -86,6 +90,10 @@
         var prefix = path.split('.').length > 2 ? 'https://' : 'https://www.';
         var urlToJumpTo = prefix + path;
         iframe.src = urlToJumpTo;
+
+        [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
+            hostDiv.innerText = urlToJumpTo;
+        });
 
         win.addEventListener('message', function (e) {
             var message = e.data;
