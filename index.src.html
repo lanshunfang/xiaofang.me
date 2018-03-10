@@ -53,6 +53,12 @@
             font-weight: bold;
             font-style: italic;
         }
+        .website-title {
+            color: #0061b9;
+        }
+        .website-title-extra {
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -69,7 +75,7 @@
     <p class="loading-failure hide">
         如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
     </p>
-    <p class="unload hide">正在打开新网页……<span class="website-title"></span></p>
+    <p class="unload hide">正在打开新网页……<span class="website-title"></span><span class="website-title-extra"></span></p>
 
 </h1>
 <script>
@@ -95,6 +101,7 @@
         var loadingFailure = doc.querySelector('#loading .loading-failure');
         var unload = doc.querySelector('#loading .unload');
         var websiteTitle = doc.querySelector('.website-title');
+        var websiteTitleExtra = doc.querySelector('.website-title-extra');
         var iframe = doc.querySelector('#wechat_iframe');
 
         var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
@@ -165,6 +172,7 @@
                 case 'beforeunload': {
                     showElement(unload);
                     websiteTitle.innerText = message.targetTitle;
+                    websiteTitleExtra.innerText = message.targetTitleExtra;
                     slideDownElement(loading);
                 }
                     break;

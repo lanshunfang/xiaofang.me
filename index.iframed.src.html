@@ -12,6 +12,7 @@
         var host = loc.host;
 
         var clickedLinkText;
+        var clickedLinkTextExtra;
 
         win.addEventListener('message', function (msg) {
             clearInterval(intervalNotifyId);
@@ -24,6 +25,8 @@
 
 
         doc.addEventListener("DOMContentLoaded", function (event) {
+
+            var $ = jQuery;
 
             var parent = win.parent;
             if (!parent) return;
@@ -49,9 +52,12 @@
                 } else {
                     delayUpdateParent();
                 }
-                clickedLinkText = $a.text()
-                    + ' ( '
-                    + $a.attr('href').split('.').reverse().reduce(function (previousValue, currentValue) {
+            }).on('mouseenter', 'a', function (e) {
+                var $a = $(this);
+
+                clickedLinkText = $a.text();
+                clickedLinkTextExtra =  ' ( '
+                    + $a.attr('href').split('/').reverse().reduce(function (previousValue, currentValue) {
                         if (previousValue && previousValue.length > 3) {
                             return previousValue
                         }
@@ -127,7 +133,8 @@
             var parent = win.parent;
             parent.postMessage({
                 msgTitle: 'beforeunload',
-                targetTitle: clickedLinkText
+                targetTitle: clickedLinkText,
+                targetTitleExtra: clickedLinkTextExtra,
             }, '*');
         }
 
@@ -144,8 +151,7 @@
             if (!parent) {
                 clearInterval(intervalNotifyId);
                 return;
-            }
-            ;
+            };
 
             parent.postMessage({
                 msgTitle: 'connected'
