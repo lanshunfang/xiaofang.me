@@ -107,9 +107,10 @@
         var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
 
         var linkPlaceholder = '--WC--';
-        var path = loc.pathname.replace(/\//, '');
+        var path = loc.pathname.replace(/\//g, '');
+        var hash = loc.hash.replace(/#/g, '');
         var prefix = path.split('.').length > 2 ? 'https://' : 'https://www.';
-        var urlToJumpTo = prefix + path;
+        var urlToJumpTo = prefix + path + hash;
         iframe.src = urlToJumpTo;
 
 

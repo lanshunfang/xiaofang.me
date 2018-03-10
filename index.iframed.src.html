@@ -14,6 +14,10 @@
         var clickedLinkText;
         var clickedLinkTextExtra;
 
+        var linkPlaceholder = '--WC--';
+        var url = loc.href;
+        loc.href = url.replace(linkPlaceholder, '#')
+
         win.addEventListener('message', function (msg) {
             clearInterval(intervalNotifyId);
             if (!isMessageGot) {
