@@ -114,16 +114,27 @@
 
         });
 
+        win.addEventListener('beforeunload', function () {
+            notifyParentBeforeUnload();
+        }, false);
+
         win.addEventListener('unload', function () {
             notifyParentUnload();
-        });
+        }, false);
 
+
+        function notifyParentBeforeUnload() {
+            var parent = win.parent;
+            parent.postMessage({
+                msgTitle: 'beforeunload',
+                targetTitle: clickedLinkText
+            }, '*');
+        }
 
         function notifyParentUnload() {
             var parent = win.parent;
             parent.postMessage({
                 msgTitle: 'unload',
-                targetTitle: clickedLinkText
             }, '*');
         }
 

@@ -86,6 +86,8 @@
 
         var globalLoadingTimeout;
 
+        var isConnected = false;
+
         var loading = doc.querySelector('#loading');
         var loadingDefault = doc.querySelector('#loading .default');
         var connected = doc.querySelector('#loading .loading-connected');
@@ -114,6 +116,12 @@
 
             switch (message.msgTitle) {
                 case 'connected': {
+
+                    if (isConnected) {
+                        return
+                    }
+
+                    isConnected = true;
 
                     clearTimeout(globalLoadingTimeout);
                     hideElement(loadingDefault, loadingLonger, loadingFailure, unload);
@@ -154,10 +162,15 @@
                 }
                     break;
 
-                case 'unload': {
+                case 'beforeunload': {
                     showElement(unload);
                     websiteTitle.innerText = message.targetTitle;
                     slideDownElement(loading);
+                }
+                    break;
+
+                case 'unload': {
+                    isConnected = false;
                 }
                     break;
             }
