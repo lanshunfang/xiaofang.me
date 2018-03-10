@@ -8,7 +8,10 @@
 
         var doc = document;
         var win = window;
-        var host = location.host;
+        var loc = location;
+        var host = loc.host;
+
+        var clickedLinkText;
 
         win.addEventListener('message', function (msg) {
             clearInterval(intervalNotifyId);
@@ -20,9 +23,9 @@
         }, false);
 
 
-        document.addEventListener("DOMContentLoaded", function (event) {
+        doc.addEventListener("DOMContentLoaded", function (event) {
 
-            var parent = window.parent;
+            var parent = win.parent;
             if (!parent) return;
 
             win.addEventListener('message', function (msg) {
@@ -34,7 +37,7 @@
 
             delayUpdateParent();
 
-            window.addEventListener("hashchange", function (event) {
+            win.addEventListener("hashchange", function (event) {
                 delayUpdateParent();
             });
 
@@ -46,7 +49,19 @@
                 } else {
                     delayUpdateParent();
                 }
-            })
+                clickedLinkText = $a.text()
+                    + ' ( '
+                    + $a.attr('href').split('.').reverse().reduce(function (previousValue, currentValue) {
+                        if (previousValue && previousValue.length > 3) {
+                            return previousValue
+                        }
+                        // you should set your title in path
+                        if (currentValue.length > 5) {
+                            return decodeURIComponent(currentValue);
+                        }
+                    }, '')
+                    + ' )'
+            });
 
             function delayUpdateParent() {
                 setTimeout(function () {
@@ -56,7 +71,7 @@
 
             function updateParent(isReplaceHref, href) {
 
-                var parent = window.parent;
+                var parent = win.parent;
                 if (!parent) {
                     return;
                 }
@@ -88,10 +103,10 @@
                     msgTitle: 'updateParent',
                     title: doc.title,
                     description: $('.entry-content').clone().find('#toc_container').remove().end().find('p').text(),
-                    url: href || location.href,
-                    path: location.path,
-                    search: location.search,
-                    hash: location.hash,
+                    url: href || loc.href,
+                    path: loc.path,
+                    search: loc.search,
+                    hash: loc.hash,
                     isReplaceHref: isReplaceHref,
                     imgSrc: $featuredImg.attr('src')
                 }, '*');
@@ -99,9 +114,22 @@
 
         });
 
+        win.addEventListener('unload', function () {
+            notifyParentUnload();
+        });
+
+
+        function notifyParentUnload() {
+            var parent = win.parent;
+            parent.postMessage({
+                msgTitle: 'unload',
+                targetTitle: clickedLinkText
+            }, '*');
+        }
+
         function notifyParentLoading() {
 
-            var parent = window.parent;
+            var parent = win.parent;
             if (!parent) {
                 clearInterval(intervalNotifyId);
                 return;

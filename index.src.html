@@ -69,6 +69,8 @@
     <p class="loading-failure hide">
         如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
     </p>
+    <p class="unload hide">正在打开新网页……<span class="website-title"></span></p>
+
 </h1>
 <script>
     (function () {
@@ -85,6 +87,8 @@
         var connected = doc.querySelector('#loading .loading-connected');
         var loadingLonger = doc.querySelector('#loading .loading-longer');
         var loadingFailure = doc.querySelector('#loading .loading-failure');
+        var unload = doc.querySelector('#loading .unload');
+        var websiteTitle = doc.querySelector('.website-title');
         var iframe = doc.querySelector('#wechat_iframe');
 
         var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
@@ -103,52 +107,60 @@
         win.addEventListener('message', function (e) {
             var message = e.data;
 
-            if (!message.msgTitle) {
-                return
+
+            switch (message.msgTitle) {
+                case 'connected': {
+
+                    clearTimeout(globalLoadingTimeout);
+                    hideElement(loadingDefault, loadingLonger, loadingFailure, unload);
+                    showElement(connected);
+
+                    slideUpElement(loading);
+
+                    setTimeout(function () {
+                        loading.style.display = 'none';
+                        connected.style.display = 'none';
+
+                    }, 1000);
+
+                }
+                    break;
+                case 'updateParent': {
+
+                    clearInterval(intervalUrlUpdateId);
+
+                    var title = message.title;
+                    var description = message.description;
+
+                    var url = lastUrlPosted = message.url;
+                    if (!url) {
+                        return
+                    }
+
+                    if (message.isReplaceHref) {
+                        loc.href = url.replace(/^\/\//g, 'http://');
+                    } else {
+                        doc.title = title;
+                        loc.hash = encodeURI(url.replace('#', linkPlaceholder));
+                        if (message.imgSrc) {
+                            doc.getElementById('featured').src = message.imgSrc;
+                        }
+                        if (description) {
+                            doc.getElementById('wechat_summary').innerText = description;
+                        }
+                    }
+
+                }
+                    break;
+
+                case 'unload': {
+                    showElement(unload);
+                    websiteTitle.innerText = message.targetTitle;
+                    slideDownElement(loading);
+                }
+                    break;
             }
 
-            if (message.msgTitle === 'connected') {
-
-                clearTimeout(globalLoadingTimeout);
-                loadingDefault.style.display = 'none';
-                loadingLonger.style.display = 'none';
-                loadingFailure.style.display = 'none';
-                connected.style.display = 'block';
-
-                loading.style.transform = 'translate(0px, -100px)';
-                loading.style.opacity = 0.5;
-                setTimeout(function () {
-                    loading.style.display = 'none';
-                    connected.style.display = 'none';
-
-                }, 1000);
-
-
-            } else if (message.msgTitle === 'updateParent') {
-
-                clearInterval(intervalUrlUpdateId);
-
-                var title = message.title;
-                var description = message.description;
-
-                var url = lastUrlPosted = message.url;
-                if (!url) {
-                    return
-                }
-
-                if (message.isReplaceHref) {
-                    loc.href = url.replace(/^\/\//g, 'http://');
-                } else {
-                    doc.title = title;
-                    loc.hash = encodeURI(url.replace('#', linkPlaceholder));
-                    if (message.imgSrc) {
-                        doc.getElementById('featured').src = message.imgSrc;
-                    }
-                    if (description) {
-                        doc.getElementById('wechat_summary').innerText = description;
-                    }
-                }
-            }
 
         });
 
@@ -194,6 +206,20 @@
                 type: 'wechat_unblocker'
             }, '*');
 
+        }
+        function hideElement(elem) {
+            elem.style.display = 'hide';
+        }
+        function showElement(elem) {
+            elem.style.display = 'block';
+        }
+        function slideUpElement(elem) {
+            elem.style.transform = 'translate(0px, -100px)';
+            elem.style.opacity = 0.5;
+        }
+        function slideDownElement(elem) {
+            elem.style.transform = 'translate(0px, 0px)';
+            elem.style.opacity = 1;
         }
     })()
 
