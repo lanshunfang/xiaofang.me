@@ -74,7 +74,11 @@
 </h1>
 <script>
     (function () {
-        // must use https://htmlcompressor.com/compressor/ to compress this doc to index.html
+        // must use
+
+        // https://htmlcompressor.com/compressor/
+
+        // to compress this doc to index.html
         var doc = document;
         var win = window;
         var lastUrlPosted;
@@ -207,11 +211,15 @@
             }, '*');
 
         }
-        function hideElement(elem) {
-            elem.style.display = 'hide';
+        function hideElement() {
+            [].forEach.call(arguments, function (elem) {
+                elem.style.display = 'none';
+            });
         }
         function showElement(elem) {
-            elem.style.display = 'block';
+            [].forEach.call(arguments, function (elem) {
+                elem.style.display = 'block';
+            });
         }
         function slideUpElement(elem) {
             elem.style.transform = 'translate(0px, -100px)';
