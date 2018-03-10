@@ -27,17 +27,15 @@
 
             win.addEventListener('message', function (msg) {
                 if (msg.type === 'wechat_unblocker') {
-                    updateParent();
+                    delayUpdateParent();
                 }
 
             }, false);
 
-            updateParent();
+            delayUpdateParent();
 
             window.addEventListener("hashchange", function (event) {
-                setTimeout(function () {
-                    updateParent();
-                }, 800)
+                delayUpdateParent();
             });
 
             $('body').on('click', 'a', function (e) {
@@ -46,11 +44,15 @@
                 if (/\/\//.test(href) && !href.match(host)) {
                     updateParent(true, href);
                 } else {
-                    setTimeout(function () {
-                        updateParent();
-                    }, 800)
+                    delayUpdateParent();
                 }
             })
+
+            function delayUpdateParent() {
+                setTimeout(function () {
+                    updateParent();
+                }, 1000)
+            }
 
             function updateParent(isReplaceHref, href) {
 
