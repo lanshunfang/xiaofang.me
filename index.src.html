@@ -48,6 +48,7 @@
         .hide {
             display: none;
         }
+
         .website-host {
             font-weight: bold;
             font-style: italic;
@@ -76,6 +77,8 @@
         var lastUrlPosted;
         var loc = location;
 
+        var globalLoadingTimeout;
+
         var loading = doc.querySelector('#loading');
         var loadingDefault = doc.querySelector('#loading .default');
         var connected = doc.querySelector('#loading .loading-connected');
@@ -83,13 +86,14 @@
         var loadingFailure = doc.querySelector('#loading .loading-failure');
         var iframe = doc.querySelector('#wechat_iframe');
 
-        var intervalNotifyId = setInterval(ensureUrlUpdated, 500);
+        var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
 
         var linkPlaceholder = '--WC--';
         var path = loc.pathname.replace(/\//, '');
         var prefix = path.split('.').length > 2 ? 'https://' : 'https://www.';
         var urlToJumpTo = prefix + path;
         iframe.src = urlToJumpTo;
+
 
         [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
             hostDiv.innerText = urlToJumpTo;
@@ -98,50 +102,47 @@
         win.addEventListener('message', function (e) {
             var message = e.data;
 
-            clearTimeout(intervalNotifyId);
-            setTimeout(ensureUrlUpdated, 100);
+            if (!message.msgTitle) {
+                return
+            }
 
             if (message.msgTitle === 'connected') {
-                clearTimeout(window.globalLoadingTimeout);
+
+                clearTimeout(globalLoadingTimeout);
                 loadingDefault.style.display = 'none';
                 loadingLonger.style.display = 'none';
                 loadingFailure.style.display = 'none';
 
-            }
+                loading.style.transform = 'translate(0px, -100px)';
+                loading.style.opacity = 0.5;
+                setTimeout(function () {
+                    loading.style.display = 'none';
+                }, 1000);
 
-            if (message.msgTitle) {
 
-                return
-            }
+            } else if (message.msgTitle === 'updateParent') {
 
-            clearTimeout(window.globalLoadingTimeout);
-            loadingLonger.style.display = 'none';
-            loadingFailure.style.display = 'none';
+                clearInterval(intervalUrlUpdateId);
 
-            loading.style.transform = 'translate(0px, -100px)';
-            loading.style.opacity = 0.5;
-            setTimeout(function () {
-                loading.style.display = 'none';
-            }, 1000);
-            var title = message.title;
-            var description = message.description;
+                var title = message.title;
+                var description = message.description;
 
-            var url = lastUrlPosted = message.url;
-            if (!url) {
-                console.error('[ERROR] url does not exist');
-                return
-            }
-
-            if (message.isReplaceHref) {
-                loc.href = url.replace(/^\/\//g, 'http://');
-            } else {
-                doc.title = title;
-                loc.hash = encodeURI(url.replace('#', linkPlaceholder));
-                if (message.imgSrc) {
-                    doc.getElementById('featured').src = message.imgSrc;
+                var url = lastUrlPosted = message.url;
+                if (!url) {
+                    return
                 }
-                if (description) {
-                    doc.getElementById('wechat_summary').innerText = description;
+
+                if (message.isReplaceHref) {
+                    loc.href = url.replace(/^\/\//g, 'http://');
+                } else {
+                    doc.title = title;
+                    loc.hash = encodeURI(url.replace('#', linkPlaceholder));
+                    if (message.imgSrc) {
+                        doc.getElementById('featured').src = message.imgSrc;
+                    }
+                    if (description) {
+                        doc.getElementById('wechat_summary').innerText = description;
+                    }
                 }
             }
 
@@ -166,14 +167,14 @@
         }
 
         function updateLoading() {
-            window.globalLoadingTimeout = setTimeout(function () {
+            globalLoadingTimeout = setTimeout(function () {
                 loadingDefault.style.display = 'none';
                 loadingLonger.style.display = 'block';
 
-                setTimeout(function () {
+                globalLoadingTimeout = setTimeout(function () {
                     loadingLonger.style.display = 'none';
                     loadingFailure.style.display = 'block';
-                    setTimeout(function () {
+                    globalLoadingTimeout = setTimeout(function () {
                         loadingFailure.style.display = 'none'
                     }, 5000)
                 }, 8000)
