@@ -15,8 +15,6 @@
         var clickedLinkTextExtra;
 
         var linkPlaceholder = '--WC--';
-        var url = loc.href;
-        loc.href = url.replace(linkPlaceholder, '#')
 
         win.addEventListener('message', function (msg) {
             clearInterval(intervalNotifyId);
@@ -47,6 +45,11 @@
             win.addEventListener("hashchange", function (event) {
                 delayUpdateParent();
             });
+
+            var url = loc.href.replace(linkPlaceholder, '#');
+            if (url !== loc.href + '') {
+                loc.replace(url);
+            }
 
             $('body').on('click', 'a', function (e) {
                 var $a = $(this);

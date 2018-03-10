@@ -53,9 +53,11 @@
             font-weight: bold;
             font-style: italic;
         }
+
         .website-title {
             color: #0061b9;
         }
+
         .website-title-extra {
             font-size: 14px;
         }
@@ -107,11 +109,6 @@
         var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
 
         var linkPlaceholder = '--WC--';
-        var path = loc.pathname.replace(/\//g, '');
-        var hash = loc.hash.replace(/#/g, '');
-        var prefix = path.split('.').length > 2 ? 'https://' : 'https://www.';
-        var urlToJumpTo = prefix + path + hash;
-        iframe.src = urlToJumpTo;
 
 
         [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
@@ -195,12 +192,19 @@
 
         function updateIFrameByUrl() {
 
+            var path = loc.pathname.replace(/\//g, '');
             var hash = loc.hash;
+
+            var prefix = path.split('.').length > 2 ? 'https://' : 'https://www.';
+            var urlToJumpTo = prefix + path;
+
             if (hash.length > 2) {
                 var url = decodeURI(hash.slice(1)).replace(linkPlaceholder, '#');
                 if (iframe.src != url && lastUrlPosted !== url) {
                     iframe.src = url;
                 }
+            } else {
+                iframe.src = urlToJumpTo;
             }
 
         }
@@ -230,16 +234,19 @@
             }, '*');
 
         }
+
         function hideElement() {
             [].forEach.call(arguments, function (elem) {
                 elem.style.display = 'none';
             });
         }
+
         function showElement(elem) {
             [].forEach.call(arguments, function (elem) {
                 elem.style.display = 'block';
             });
         }
+
         function slideUpElement(elem) {
             elem.style.transform = 'translate(0px, -100px)';
             elem.style.opacity = 0.5;
@@ -247,6 +254,7 @@
                 hideElement(elem)
             }, 1000);
         }
+
         function slideDownElement(elem) {
             showElement(elem);
 
