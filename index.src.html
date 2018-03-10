@@ -72,6 +72,7 @@
 </h1>
 <script>
     (function () {
+        // must use https://htmlcompressor.com/compressor/ to compress this doc to index.html
         var doc = document;
         var win = window;
         var lastUrlPosted;
@@ -112,11 +113,14 @@
                 loadingDefault.style.display = 'none';
                 loadingLonger.style.display = 'none';
                 loadingFailure.style.display = 'none';
+                connected.style.display = 'block';
 
                 loading.style.transform = 'translate(0px, -100px)';
                 loading.style.opacity = 0.5;
                 setTimeout(function () {
                     loading.style.display = 'none';
+                    connected.style.display = 'none';
+
                 }, 1000);
 
 
