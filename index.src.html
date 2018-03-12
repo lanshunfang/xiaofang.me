@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0"/>
     <title>微信网站微信中继...</title>
+    <link id="favicon" rel="icon" href="./favicon.ico" type="image/gif" sizes="16x16">
     <style>
         #wechat_iframe {
             position: absolute;
@@ -54,7 +55,7 @@
             font-style: italic;
         }
 
-        .website-title {
+        .link {
             color: #0061b9;
         }
 
@@ -71,13 +72,13 @@
 </iframe>
 
 <h1 id="loading">
-    <p class="default">正在载入网站 <span class="website-host"></span> ... </p>
+    <p class="default">正在载入网站 <span class="website-host link"></span> ... </p>
     <p class="loading-connected hide">网站已经连接成功，正在加载完整数据....</p>
     <p class="loading-longer hide">不好意思，好像加载时间略长一些，请再耐心等等。</p>
     <p class="loading-failure hide">
         如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
     </p>
-    <p class="unload hide">正在打开新网页……<span class="website-title"></span>(<span class="website-title-extra"></span>)</p>
+    <p class="unload hide">正在打开新网页……<span class="website-title link"></span>(<span class="website-title-extra"></span>)</p>
 
 </h1>
 <script>
@@ -108,8 +109,18 @@
 
         var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
 
-        var linkPlaceholder = '--WC--';
+        var hashPlaceholder = '/--WC--';
+        var hashPlaceholderRexExp = new RegExp(hashPlaceholder, 'g');
 
+        var loadingIFrameEventName = 'loadingIFrame';
+        var loadingIFrameEvent = new Event(loadingIFrameEventName);
+        
+        var enforceProtocol = 'https://';
+
+        var repoNameAsWebsiteHost = loc.pathname.replace(/\//, '').split('/')[0];
+
+        // convert old hastag style to HTML5 History style
+        convertHasTagToHistoryState();
 
         win.addEventListener('message', function (e) {
             var message = e.data;
@@ -141,22 +152,34 @@
 
                     var title = message.title;
                     var description = message.description;
+                    var faviconUrl = message.faviconUrl;
 
-                    var url = lastUrlPosted = message.url;
-                    if (!url) {
+                    var iFrameUrlPartTmp = lastUrlPosted = message.url;
+                    if (!iFrameUrlPartTmp) {
                         return
                     }
 
                     if (message.isReplaceHref) {
-                        loc.href = url.replace(/^\/\//g, 'http://');
+                        loc.href = iFrameUrlPartTmp.replace(/^\/\//g, 'http://');
                     } else {
+
                         doc.title = title;
-                        loc.hash = encodeURI(url.replace('#', linkPlaceholder));
+
+                        // https://www.example.com/a/b/c/#Main
+                        // =>
+                        // www.example.com/a/b/c//--WC-Main
+                        var iFrameUrlPart = iFrameUrlPartTmp.replace(enforceProtocol, '').replace('#', hashPlaceholder);
+
+                        updateUrl(iFrameUrlPart);
+
                         if (message.imgSrc) {
                             doc.getElementById('featured').src = message.imgSrc;
                         }
                         if (description) {
                             doc.getElementById('wechat_summary').innerText = description;
+                        }
+                        if (faviconUrl) {
+                            doc.getElementById('favicon').setAttribute('href', faviconUrl);
                         }
                     }
 
@@ -181,33 +204,91 @@
 
         });
 
-        doc.addEventListener("DOMContentLoaded", function () {
+
+        doc.addEventListener(loadingIFrameEventName, function (e) {
             updateIFrameByUrl();
-            updateLoading()
+        }, false);
+
+        doc.addEventListener("DOMContentLoaded", function () {
+            doc.dispatchEvent(loadingIFrameEvent);
+            updateLoading();
 
         });
 
+        win.addEventListener('popstate', function (e) {
+            var iframeWin = iframe.contentWindow;
+
+            if (!iframeWin) return;
+
+            iframeWin.postMessage({
+                type: 'updateIFrameUrlByState',
+                url: getIFrameUrl()
+            }, '*');
+        }, false);
+        
+        function convertHasTagToHistoryState() {
+            // https://OWNER.github.io/example.com/#https://www.example.com/a/b/c/--WC--Main
+            // =>
+            // www.example.com/a/b/c#Main
+            var iFrameUrlPart = location.hash.replace(/^#/, '').replace(enforceProtocol, '');
+
+            if (iFrameUrlPart.length > 3) {
+                updateUrl(iFrameUrlPart)
+            }
+        }
+        
+        function getIFrameUrlFromPart(iFrameUrlPart) {
+            return enforceProtocol + iFrameUrlPart.replace(hashPlaceholderRexExp, '#');
+        }
+
+        function updateUrl(iFrameUrlPart) {
+            //iFrameUrlPart: www.example.com/a/b/c//--WC-Main
+
+            var iframeWin = iframe.contentWindow;
+
+            if (!iframeWin) return;
+
+            // handle hash tag
+            history.pushState({}, "", repoNameAsWebsiteHost + '/' + iFrameUrlPart);
+        }
+
         function updateIFrameByUrl() {
 
-            var path = loc.pathname.replace(/\//g, '');
-            var hash = loc.hash;
+            var urlToJumpTo = getIFrameUrl();
 
-            var prefix = path.split('.').length > 2 ? 'https://' : 'https://www.';
-            var urlToJumpTo = prefix + path;
-
-            if (hash.length > 2) {
-                var url = decodeURI(hash.slice(1)).replace(linkPlaceholder, '#');
-                if (iframe.src != url && lastUrlPosted !== url) {
-                    urlToJumpTo = url;
-                }
+            if (iframe.src != urlToJumpTo) {
+                iframe.src = urlToJumpTo;
             }
-
-            iframe.src = urlToJumpTo;
 
             [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
                 hostDiv.innerText = getSEOArticleTitleFromUrl(urlToJumpTo);
             });
 
+        }
+
+        function getIFrameUrl() {
+
+            var iFrameUrlPart, path;
+
+            //OWNER.github.com/example.com/sub1.example.com/a/b/c/--WC--section1 => example.com/sub1.example.com/a/b/c/--WC--section1
+            // =>
+            // example.com/sub1.example.com/a/b/c/--WC--section1 => sub1.example.com/a/b/c/--WC--section1
+            path = loc.pathname.replace(/^\//, '');
+            // sub1.example.com/a/b/c/--WC--section1
+            iFrameUrlPart = path.replace(repoNameAsWebsiteHost, '');
+
+            // downward compatible with github.com/OWNER/example.com -> www.example.com
+            var prefix = repoNameAsWebsiteHost.split('.').length > 2 ? enforceProtocol : enforceProtocol + 'www.';
+            var urlToJumpTo = prefix + repoNameAsWebsiteHost;
+
+            if (iFrameUrlPart && iFrameUrlPart.length > 5) {
+                var iframeUrl = getIFrameUrlFromPart(iFrameUrlPart);
+                if (iframe.src != iframeUrl && lastUrlPosted !== iframeUrl) {
+                    urlToJumpTo = iframeUrl;
+                }
+            }
+
+            return urlToJumpTo;
         }
 
         function updateLoading() {
