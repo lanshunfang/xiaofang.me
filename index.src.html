@@ -77,7 +77,7 @@
     <p class="loading-failure hide">
         如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
     </p>
-    <p class="unload hide">正在打开新网页……<span class="website-title"></span><span class="website-title-extra"></span></p>
+    <p class="unload hide">正在打开新网页……<span class="website-title"></span>(<span class="website-title-extra"></span>)</p>
 
 </h1>
 <script>
@@ -166,7 +166,8 @@
                 case 'beforeunload': {
                     showElement(unload);
                     websiteTitle.innerText = message.targetTitle;
-                    websiteTitleExtra.innerText = message.targetTitleExtra;
+
+                    websiteTitleExtra.innerText =  getSEOArticleTitleFromUrl(message.targetTitleExtra);
                     slideDownElement(loading);
                 }
                     break;
@@ -204,7 +205,7 @@
             iframe.src = urlToJumpTo;
 
             [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
-                hostDiv.innerText = urlToJumpTo;
+                hostDiv.innerText = getSEOArticleTitleFromUrl(urlToJumpTo);
             });
 
         }
@@ -260,6 +261,23 @@
 
             elem.style.transform = 'translate(0px, 0px)';
             elem.style.opacity = 1;
+        }
+
+        function getSEOArticleTitleFromUrl(url) {
+            url = url || '';
+            var handledUrl = url.split('/').reverse().reduce(function (previousValue, currentValue) {
+                // you should set your title in path
+                currentValue = decodeURIComponent(currentValue);
+
+                if (currentValue && currentValue.length > 5 && currentValue.length > previousValue.length) {
+                    return currentValue;
+                } else {
+                    return previousValue
+                }
+
+            }, '');
+
+            return handledUrl && /[\u4E00-\u9FA5]+/.test(handledUrl) ? handledUrl :  url
         }
     })()
 
