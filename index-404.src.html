@@ -66,7 +66,7 @@
 </head>
 <body>
 <div id="wechat_img"><img id="featured" width="800" height="600"
-                          src="//www.xiaofang.me/wp-content/uploads/2014/11/unnamed.png"/></div>
+                          src="banner.png"/></div>
 <div id="wechat_summary">守望的微信网站跳转中……</div>
 <iframe id="wechat_iframe" height="100%" width="100%" src="">
 </iframe>
@@ -107,6 +107,7 @@
         var websiteTitleExtra = doc.querySelector('.website-title-extra');
         var iframe = doc.querySelector('#wechat_iframe');
         var favicon = doc.getElementById('favicon');
+        var featured = doc.getElementById('featured');
 
         var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
 
@@ -121,6 +122,8 @@
         var repoNameAsWebsiteHost = loc.pathname.replace(/\//, '').split('/')[0];
 
         favicon.href = '/' + repoNameAsWebsiteHost + '/' + favicon.href;
+
+        featured.src = '/' + repoNameAsWebsiteHost + '/' + featured.src;
 
         // convert old hastag style to HTML5 History style
         convertHasTagToHistoryState();
@@ -176,7 +179,7 @@
                         updateUrl(iFrameUrlPart);
 
                         if (message.imgSrc) {
-                            doc.getElementById('featured').src = message.imgSrc;
+                            featured.src = message.imgSrc;
                         }
                         if (description) {
                             doc.getElementById('wechat_summary').innerText = description;
