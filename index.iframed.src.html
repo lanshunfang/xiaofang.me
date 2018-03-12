@@ -29,11 +29,15 @@
             var $ = jQuery;
 
             var parent = win.parent;
-            if (!parent) return;
+            if (!parent || parent === win) return;
 
             win.addEventListener('message', function (msg) {
-                if (msg.type === 'wechat_unblocker') {
+                var msgData = msg.data;
+                var type = msgData.type;
+                if (type === 'wechat_unblocker') {
                     delayUpdateParent();
+                } else if (type === 'updateIFrameUrlByState') {
+                    reactToParentUrlPopState(msgData.url);
                 }
 
             }, false);
@@ -68,7 +72,7 @@
             function updateParent(isReplaceHref, href) {
 
                 var parent = win.parent;
-                if (!parent) {
+                if (!parent || parent === win) {
                     return;
                 }
 
@@ -120,8 +124,16 @@
         }, false);
 
 
+        function reactToParentUrlPopState(url) {
+            if (url !== location.href) {
+                location.replace(url)
+            }
+        }
+
         function notifyParentBeforeUnload() {
             var parent = win.parent;
+            if (!parent || parent === win) return;
+
             parent.postMessage({
                 msgTitle: 'beforeunload',
                 targetTitle: clickedLinkText,
@@ -131,6 +143,8 @@
 
         function notifyParentUnload() {
             var parent = win.parent;
+            if (!parent || parent === win) return;
+
             parent.postMessage({
                 msgTitle: 'unload',
             }, '*');
@@ -139,10 +153,10 @@
         function notifyParentLoading() {
 
             var parent = win.parent;
-            if (!parent) {
+            if (!parent || parent === win) {
                 clearInterval(intervalNotifyId);
                 return;
-            };
+            }
 
             parent.postMessage({
                 msgTitle: 'connected'

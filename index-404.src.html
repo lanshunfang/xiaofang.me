@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0"/>
     <title>微信网站微信中继...</title>
-    <link id="favicon" rel="icon" href="./favicon.ico" type="image/gif" sizes="16x16">
+    <link id="favicon" rel="icon" href="" type="image/gif" sizes="16x16">
     <style>
         #wechat_iframe {
             position: absolute;
@@ -66,7 +66,7 @@
 </head>
 <body>
 <div id="wechat_img"><img id="featured" width="800" height="600"
-                          src="banner.png"/></div>
+                          src=""/></div>
 <div id="wechat_summary">守望的微信网站跳转中……</div>
 <iframe id="wechat_iframe" height="100%" width="100%" src="">
 </iframe>
@@ -121,9 +121,9 @@
 
         var repoNameAsWebsiteHost = loc.pathname.replace(/\//, '').split('/')[0];
 
-        favicon.href = '/' + repoNameAsWebsiteHost + '/' + favicon.href;
+        favicon.href = '/' + repoNameAsWebsiteHost + '/' + 'favicon.ico';
 
-        featured.src = '/' + repoNameAsWebsiteHost + '/' + featured.src;
+        featured.src = '/' + repoNameAsWebsiteHost + '/' + 'banner.png';
 
         // convert old hastag style to HTML5 History style
         convertHasTagToHistoryState();
