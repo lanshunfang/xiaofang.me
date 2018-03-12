@@ -78,7 +78,7 @@
     <p class="loading-failure hide">
         如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
     </p>
-    <p class="unload hide">正在打开新网页……<span class="website-title link"></span>(<span class="website-title-extra"></span>)</p>
+    <p class="unload hide">正在打开新网页……<span class="website-title link"></span><br /><br />(<span class="website-title-extra"></span>)</p>
 
 </h1>
 <script>
@@ -106,6 +106,7 @@
         var websiteTitle = doc.querySelector('.website-title');
         var websiteTitleExtra = doc.querySelector('.website-title-extra');
         var iframe = doc.querySelector('#wechat_iframe');
+        var favicon = doc.getElementById('favicon');
 
         var intervalUrlUpdateId = setInterval(ensureUrlUpdated, 500);
 
@@ -118,6 +119,8 @@
         var enforceProtocol = 'https://';
 
         var repoNameAsWebsiteHost = loc.pathname.replace(/\//, '').split('/')[0];
+
+        favicon.href = '/' + repoNameAsWebsiteHost + '/' + favicon.href;
 
         // convert old hastag style to HTML5 History style
         convertHasTagToHistoryState();
@@ -179,7 +182,7 @@
                             doc.getElementById('wechat_summary').innerText = description;
                         }
                         if (faviconUrl) {
-                            doc.getElementById('favicon').setAttribute('href', faviconUrl);
+                            favicon.setAttribute('href', faviconUrl);
                         }
                     }
 
