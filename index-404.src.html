@@ -230,7 +230,7 @@
             // https://OWNER.github.io/example.com/#https://www.example.com/a/b/c/--WC--Main
             // =>
             // www.example.com/a/b/c#Main
-            var iFrameUrlPart = location.hash.replace(/^#/, '').replace(enforceProtocol, '');
+            var iFrameUrlPart = decodeURI(location.hash.replace(/^#/, '').replace(enforceProtocol, ''));
 
             if (iFrameUrlPart.length > 3) {
                 updateUrl(iFrameUrlPart)
