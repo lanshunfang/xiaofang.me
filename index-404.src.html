@@ -78,7 +78,8 @@
     <p class="loading-failure hide">
         如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
     </p>
-    <p class="unload hide">正在打开新网页……<span class="website-title link"></span><br /><br />(<span class="website-title-extra"></span>)</p>
+    <p class="unload hide">正在打开新网页……<span class="website-title link"></span><br/><br/>(<span
+            class="website-title-extra"></span>)</p>
 
 </h1>
 <script>
@@ -195,11 +196,12 @@
                 case 'beforeunload': {
                     showElement(unload);
                     websiteTitle.innerText = message.targetTitle;
-                    var  targetTitleExtra = message.targetTitleExtra;
-                    websiteTitleExtra.innerText =  getSEOArticleTitleFromUrl(targetTitleExtra);
+                    var targetTitleExtra = message.targetTitleExtra;
+                    websiteTitleExtra.innerText = getSEOArticleTitleFromUrl(targetTitleExtra);
                     // slideDownElement(loading);
-                    reload(targetTitleExtra);
                     slideDownElement(loading);
+
+                    reload(targetTitleExtra);
                 }
                     break;
 
@@ -353,7 +355,20 @@
         }
 
         function reload(url) {
-            loc.href = url;
+
+            if (url && url.length > 10) {
+
+                // https://www.example.com/a/b/c/#Main
+                // =>
+                // www.example.com/a/b/c//--WC-Main
+                var iFrameUrlPart = url.replace(enforceProtocol, '').replace('#', hashPlaceholder);
+
+                updateUrl(iFrameUrlPart);
+
+                setTimeout(function () {
+                    loc.reload();
+                }, 10)
+            }
         }
 
         function getSEOArticleTitleFromUrl(url) {
@@ -370,7 +385,7 @@
 
             }, '');
 
-            return handledUrl && /[\u4E00-\u9FA5]+/.test(handledUrl) ? handledUrl :  url
+            return handledUrl && /[\u4E00-\u9FA5]+/.test(handledUrl) ? handledUrl : url
         }
     })()
 
