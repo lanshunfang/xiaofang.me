@@ -195,8 +195,10 @@
                 case 'beforeunload': {
                     showElement(unload);
                     websiteTitle.innerText = message.targetTitle;
-
-                    websiteTitleExtra.innerText =  getSEOArticleTitleFromUrl(message.targetTitleExtra);
+                    var  targetTitleExtra = message.targetTitleExtra;
+                    websiteTitleExtra.innerText =  getSEOArticleTitleFromUrl(targetTitleExtra);
+                    // slideDownElement(loading);
+                    reload(targetTitleExtra);
                     slideDownElement(loading);
                 }
                     break;
@@ -236,7 +238,7 @@
             // https://OWNER.github.io/example.com/#https://www.example.com/a/b/c/--WC--Main
             // =>
             // www.example.com/a/b/c#Main
-            var iFrameUrlPart = decodeURI(location.hash.replace(/^#/, '').replace(enforceProtocol, ''));
+            var iFrameUrlPart = decodeURI(loc.hash.replace(/^#/, '').replace(enforceProtocol, ''));
 
             if (iFrameUrlPart.length > 3) {
                 updateUrl(iFrameUrlPart)
@@ -348,6 +350,10 @@
 
             elem.style.transform = 'translate(0px, 0px)';
             elem.style.opacity = 1;
+        }
+
+        function reload(url) {
+            loc.href = url;
         }
 
         function getSEOArticleTitleFromUrl(url) {
