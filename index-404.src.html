@@ -266,7 +266,7 @@
             setTimeout(function () {
                 var lastIFrameUrl = localStorage.getItem('lastIFrameUrl');
 
-                if (lastIFrameUrl !== iFrameUrl) {
+                if (lastIFrameUrl !== iFrameUrl && lastIFrameUrl && iFrameUrl && iFrameUrl.length > 10 ) {
                     localStorage.setItem('lastIFrameUrl', iFrameUrl)
                     loc.reload();
                 }
