@@ -258,17 +258,25 @@
 
             if (!iframeWin) return;
 
-            var iFrameUrl =  '/' + repoNameAsWebsiteHost + '/' + iFrameUrlPart;
+            var iFrameUrl = '/' + repoNameAsWebsiteHost + '/' + iFrameUrlPart;
 
             // handle hash tag
             history.pushState({}, "", iFrameUrl);
 
             setTimeout(function () {
                 var lastIFrameUrl = localStorage.getItem('lastIFrameUrl');
+                var lastIFrameUrlDateTime = localStorage.getItem('lastIFrameUrlDateTime');
 
-                if (lastIFrameUrl !== iFrameUrl && lastIFrameUrl && iFrameUrl && iFrameUrl.length > 10 ) {
-                    localStorage.setItem('lastIFrameUrl', iFrameUrl)
-                    loc.reload();
+                if (lastIFrameUrl !== iFrameUrl && iFrameUrl && iFrameUrl.length > 10) {
+                    localStorage.setItem('lastIFrameUrl', iFrameUrl);
+
+                    var IFrameUrlDateTime = new Date().valueOf();
+                    localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
+
+                    if (lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
+                        loc.reload();
+                    }
+
                 }
             }, 10)
         }
