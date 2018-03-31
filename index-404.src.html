@@ -121,6 +121,7 @@
         var enforceProtocol = 'https://';
 
         var repoNameAsWebsiteHost = loc.pathname.replace(/\//, '').split('/')[0];
+        var lastIFrameUrl = '';
 
         favicon.href = '/' + repoNameAsWebsiteHost + '/' + 'favicon.ico';
 
@@ -258,8 +259,17 @@
 
             if (!iframeWin) return;
 
+            var iFrameUrl =  '/' + repoNameAsWebsiteHost + '/' + iFrameUrlPart;
+
             // handle hash tag
-            history.pushState({}, "", '/' + repoNameAsWebsiteHost + '/' + iFrameUrlPart);
+            history.pushState({}, "", iFrameUrl);
+
+            setTimeout(function () {
+                if (lastIFrameUrl !== iFrameUrl) {
+                    lastIFrameUrl = iFrameUrl;
+                    loc.reload();
+                }
+            }, 10)
         }
 
         function updateIFrameByUrl() {
@@ -364,10 +374,6 @@
                 var iFrameUrlPart = url.replace(enforceProtocol, '').replace('#', hashPlaceholder);
 
                 updateUrl(iFrameUrlPart);
-
-                setTimeout(function () {
-                    loc.reload();
-                }, 10)
             }
         }
 
