@@ -121,7 +121,6 @@
         var enforceProtocol = 'https://';
 
         var repoNameAsWebsiteHost = loc.pathname.replace(/\//, '').split('/')[0];
-        var lastIFrameUrl = '';
 
         favicon.href = '/' + repoNameAsWebsiteHost + '/' + 'favicon.ico';
 
@@ -265,8 +264,10 @@
             history.pushState({}, "", iFrameUrl);
 
             setTimeout(function () {
+                var lastIFrameUrl = localStorage.getItem('lastIFrameUrl');
+
                 if (lastIFrameUrl !== iFrameUrl) {
-                    lastIFrameUrl = iFrameUrl;
+                    localStorage.setItem('lastIFrameUrl', iFrameUrl)
                     loc.reload();
                 }
             }, 10)
