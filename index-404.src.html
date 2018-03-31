@@ -267,11 +267,13 @@
                 var lastIFrameUrl = localStorage.getItem('lastIFrameUrl');
                 var lastIFrameUrlDateTime = localStorage.getItem('lastIFrameUrlDateTime');
 
-                if (lastIFrameUrl !== iFrameUrl && iFrameUrl && iFrameUrl.length > 10) {
-                    localStorage.setItem('lastIFrameUrl', iFrameUrl);
+                var IFrameUrlDateTime = new Date().valueOf();
 
-                    var IFrameUrlDateTime = new Date().valueOf();
-                    localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
+                localStorage.setItem('lastIFrameUrl', iFrameUrl);
+                localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
+
+
+                if (lastIFrameUrl !== iFrameUrl && iFrameUrl && iFrameUrl.length > 10) {
 
                     if (lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
                         loc.reload();
