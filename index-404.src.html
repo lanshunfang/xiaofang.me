@@ -270,32 +270,18 @@
                 var IFrameUrlDateTime = new Date().valueOf();
 
                 localStorage.setItem('lastIFrameUrl', iFrameUrl);
-                localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
 
 
                 if (lastIFrameUrl !== iFrameUrl && iFrameUrl && iFrameUrl.length > 10) {
 
-                    if (
-                        lastIFrameUrlDateTime
-                        && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
-                        // loc.reload();
-                        fireLoad()
+                    if (lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 5000 < IFrameUrlDateTime) {
+                        localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
+
+                        loc.reload();
                     }
 
                 }
             }, 10)
-        }
-
-        function fireLoad() {
-
-            // notify Wechat to update URL / Page Title
-            var load_event = doc.createEvent('Event');
-            load_event.initEvent('load', false, false);
-            win.dispatchEvent(load_event);
-
-            load_event = doc.createEvent("HTMLEvents");
-            load_event.initEvent("load", true, true);
-            doc.dispatchEvent(load_event);
         }
 
         function updateIFrameByUrl() {
