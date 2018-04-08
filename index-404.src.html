@@ -229,6 +229,12 @@
 
         });
 
+        doc.addEventListener('visibilitychange', function(){
+            if (document.hidden) {
+                loc.reload();
+            }
+        });
+
         win.addEventListener('popstate', function (e) {
             var iframeWin = iframe.contentWindow;
 
@@ -283,7 +289,7 @@
                         lastIFrameUrlDateTime
                         && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime
                         && IFrameUrlDateTime > loadedTime + 5000) {
-                        loc.reload();
+                        // loc.reload();
                     }
 
                 }
