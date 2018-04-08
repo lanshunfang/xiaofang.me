@@ -98,8 +98,6 @@
 
         var isConnected = false;
 
-        var loadedTime = 0;
-
         var loading = doc.querySelector('#loading');
         var loadingDefault = doc.querySelector('#loading .default');
         var connected = doc.querySelector('#loading .loading-connected');
@@ -137,8 +135,6 @@
 
             switch (message.msgTitle) {
                 case 'connected': {
-
-                    loadedTime = new Date().valueOf();
 
                     if (isConnected) {
                         return
@@ -281,8 +277,7 @@
 
                     if (
                         lastIFrameUrlDateTime
-                        && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime
-                        && IFrameUrlDateTime > loadedTime + 5000) {
+                        && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
                         // loc.reload();
                         fireLoad()
                     }
