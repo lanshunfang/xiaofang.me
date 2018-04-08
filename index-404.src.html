@@ -97,6 +97,7 @@
         var globalLoadingTimeout;
 
         var isConnected = false;
+        var firstConnectedTime = 0;
 
         var loading = doc.querySelector('#loading');
         var loadingDefault = doc.querySelector('#loading .default');
@@ -135,6 +136,8 @@
 
             switch (message.msgTitle) {
                 case 'connected': {
+
+                    firstConnectedTime = firstConnectedTime || new Date().valueOf();
 
                     if (isConnected) {
                         return
@@ -274,7 +277,10 @@
 
                 if (lastIFrameUrl !== iFrameUrl && iFrameUrl && iFrameUrl.length > 10) {
 
-                    if (lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 5000 < IFrameUrlDateTime) {
+                    // never reload on before 7 secs of first iframe sending Connected
+                    if (firstConnectedTime
+                        && IFrameUrlDateTime > firstConnectedTime + 7000
+                        && lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
                         localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
 
                         loc.reload();
