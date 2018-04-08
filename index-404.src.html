@@ -229,12 +229,6 @@
 
         });
 
-        doc.addEventListener('visibilitychange', function(){
-            if (document.hidden) {
-                loc.reload();
-            }
-        });
-
         win.addEventListener('popstate', function (e) {
             var iframeWin = iframe.contentWindow;
 
@@ -290,10 +284,23 @@
                         && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime
                         && IFrameUrlDateTime > loadedTime + 5000) {
                         // loc.reload();
+                        fireLoad()
                     }
 
                 }
             }, 10)
+        }
+
+        function fireLoad() {
+
+            // notify Wechat to update URL / Page Title
+            var load_event = doc.createEvent('Event');
+            load_event.initEvent('load', false, false);
+            win.dispatchEvent(load_event);
+
+            load_event = doc.createEvent("HTMLEvents");
+            load_event.initEvent("load", true, true);
+            doc.dispatchEvent(load_event);
         }
 
         function updateIFrameByUrl() {
