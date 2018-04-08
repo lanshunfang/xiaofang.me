@@ -205,6 +205,10 @@
                     slideDownElement(loading);
 
                     reload(targetTitleExtra);
+
+                    setTimeout(function () {
+                        loc.reload();
+                    }, 200)
                 }
                     break;
 
@@ -272,6 +276,8 @@
 
                 var IFrameUrlDateTime = new Date().valueOf();
 
+                localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
+
                 localStorage.setItem('lastIFrameUrl', iFrameUrl);
 
 
@@ -281,7 +287,6 @@
                     if (firstConnectedTime
                         && IFrameUrlDateTime > firstConnectedTime + 7000
                         && lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
-                        localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
 
                         loc.reload();
                     }
