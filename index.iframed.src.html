@@ -26,9 +26,15 @@
 
         doc.addEventListener("DOMContentLoaded", function (event) {
 
+          if (typeof jQuery !== 'undefined') {
             var $ = jQuery;
+          } else {
+            var $ = window.$;
+          }
 
-            var parent = win.parent;
+
+
+          var parent = win.parent;
             if (!parent || parent === win) return;
 
             win.addEventListener('message', function (msg) {
@@ -175,7 +181,6 @@
             }
             return favicon;
         }
-
 
 
     })();

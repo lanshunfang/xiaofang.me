@@ -1,89 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=3.0, minimum-scale=1.0"/>
     <title>微信网站微信中继...</title>
     <link id="favicon" rel="icon" href="" type="image/gif" sizes="16x16">
     <style>
-        #wechat_iframe {
-            position: absolute;
-            left: -2px;
-            top: -2px;
-            right: -2px;
-            bottom: -2px;
-        }
+      #wechat_iframe {
+        position: absolute;
+        left: -2px;
+        top: -2px;
+        right: -2px;
+        bottom: -2px;
+      }
 
-        #loading {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            background: #fff;
-            opacity: .9;
-            transition: all 2s;
-        }
+      #loading {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        background: #ffffff;
+        opacity: .9;
+        transition: all 2s;
+      }
 
-        #loading p.default {
-            margin-bottom: 0;
-        }
+      #loading p.default {
+        margin-bottom: 0;
+      }
 
-        #loading .loading-longer {
-            color: #ff6708
-        }
+      #loading .loading-longer {
+        color: #ff6708
+      }
 
-        #loading .loading-connected {
-            color: #0061b9
-        }
+      #loading .loading-connected {
+        color: #0061b9
+      }
 
-        #wechat_img, #wechat_summary {
-            height: 1px;
-            width: 1px;
-            overflow: hidden;
-            opacity: .1;
-            position: fixed;
-            bottom: 0;
-            left: 0
-        }
+      #wechat_img, #wechat_summary {
+        height: 1px;
+        width: 1px;
+        overflow: hidden;
+        opacity: .1;
+        position: fixed;
+        bottom: 0;
+        left: 0
+      }
 
-        .hide {
-            display: none;
-        }
+      .hide {
+        display: none;
+      }
 
-        .website-host {
-            font-weight: bold;
-            font-style: italic;
-        }
+      .website-host {
+        font-weight: bold;
+        font-style: italic;
+      }
 
-        .link {
-            color: #0061b9;
-        }
+      .link {
+        color: #0061b9;
+      }
 
-        .website-title-extra {
-            font-size: 14px;
-        }
+      .website-title-extra {
+        font-size: 14px;
+      }
     </style>
-</head>
-<body>
-<div id="wechat_img"><img id="featured" width="800" height="600"
-                          src=""/></div>
-<div id="wechat_summary">守望的微信网站跳转中……</div>
-<iframe id="wechat_iframe" height="100%" width="100%" src="">
-</iframe>
+  </head>
+  <body>
+    <div id="wechat_img"><img id="featured" width="800" height="600"
+                              src=""/></div>
+    <div id="wechat_summary">守望的微信网站跳转中……</div>
+    <iframe id="wechat_iframe" height="100%" width="100%" src="">
+    </iframe>
 
-<h1 id="loading">
-    <p class="default">正在载入网站 <span class="website-host link"></span> ... </p>
-    <p class="loading-connected hide">网站已经连接成功，正在加载完整数据....</p>
-    <p class="loading-longer hide">不好意思，好像加载时间略长一些，请再耐心等等。</p>
-    <p class="loading-failure hide">
+    <h1 id="loading">
+      <p class="default">正在载入网站 <span class="website-host link"></span> ... </p>
+      <p class="loading-connected hide">网站已经连接成功，正在加载完整数据....</p>
+      <p class="loading-longer hide">不好意思，好像加载时间略长一些，请再耐心等等。</p>
+      <p class="loading-failure hide">
         如果不想等，请点击微信右上角，选择"在浏览器(Safari/QQ)打开"；或者直接在你的手机浏览器里输入 <span class="website-host"></span>：
-    </p>
-    <p class="unload hide">正在打开新网页……<span class="website-title link"></span><br/><br/>(<span
-            class="website-title-extra"></span>)</p>
+      </p>
+      <p class="unload hide">正在打开新网页……<span class="website-title link"></span><br/><br/>(<span
+        class="website-title-extra"></span>)</p>
 
-</h1>
-<script>
-    (function () {
+    </h1>
+    <script>
+      (function() {
         // must use
 
         // https://htmlcompressor.com/compressor/
@@ -129,297 +130,311 @@
 
         // convert old hastag style to HTML5 History style
         convertHasTagToHistoryState();
+        jumpOutOfIframeOnNoWechat();
 
-        win.addEventListener('message', function (e) {
-            var message = e.data;
+        win.addEventListener('message', function(e) {
+          var message = e.data;
 
+          switch(message.msgTitle) {
+            case 'connected': {
 
-            switch (message.msgTitle) {
-                case 'connected': {
+              firstConnectedTime = firstConnectedTime || new Date().valueOf();
 
-                    firstConnectedTime = firstConnectedTime || new Date().valueOf();
+              if(isConnected) {
+                return
+              }
 
-                    if (isConnected) {
-                        return
-                    }
+              isConnected = true;
 
-                    isConnected = true;
+              clearTimeout(globalLoadingTimeout);
+              hideElement(loadingDefault, loadingLonger, loadingFailure, unload);
+              showElement(connected);
 
-                    clearTimeout(globalLoadingTimeout);
-                    hideElement(loadingDefault, loadingLonger, loadingFailure, unload);
-                    showElement(connected);
+              setTimeout(function() {
+                hideElement(connected);
+                slideUpElement(loading);
+              }, 500);
 
-                    setTimeout(function () {
-                        hideElement(connected);
-                        slideUpElement(loading);
-                    }, 500);
-
-                }
-                    break;
-                case 'updateParent': {
-
-                    clearInterval(intervalUrlUpdateId);
-
-                    var title = message.title;
-                    var description = message.description;
-                    var faviconUrl = message.faviconUrl;
-
-                    var iFrameUrlPartTmp = lastUrlPosted = message.url;
-                    if (!iFrameUrlPartTmp) {
-                        return
-                    }
-
-                    if (message.isReplaceHref) {
-                        loc.href = iFrameUrlPartTmp.replace(/^\/\//g, 'http://');
-                    } else {
-
-                        doc.title = title;
-
-                        // https://www.example.com/a/b/c/#Main
-                        // =>
-                        // www.example.com/a/b/c//--WC-Main
-                        var iFrameUrlPart = iFrameUrlPartTmp.replace(enforceProtocol, '').replace('#', hashPlaceholder);
-
-                        updateUrl(iFrameUrlPart);
-
-                        if (message.imgSrc) {
-                            featured.src = message.imgSrc;
-                        }
-                        if (description) {
-                            doc.getElementById('wechat_summary').innerText = description;
-                        }
-                        if (faviconUrl) {
-                            favicon.setAttribute('href', faviconUrl);
-                        }
-                    }
-
-                }
-                    break;
-
-                case 'beforeunload': {
-                    showElement(unload);
-                    websiteTitle.innerText = message.targetTitle;
-                    var targetTitleExtra = message.targetTitleExtra;
-                    websiteTitleExtra.innerText = getSEOArticleTitleFromUrl(targetTitleExtra);
-                    // slideDownElement(loading);
-                    slideDownElement(loading);
-
-                    reload(targetTitleExtra);
-
-                    setTimeout(function () {
-                        loc.reload();
-                    }, 200)
-                }
-                    break;
-
-                case 'unload': {
-                    isConnected = false;
-                }
-                    break;
             }
+              break;
+            case 'updateParent': {
 
+              clearInterval(intervalUrlUpdateId);
+
+              var title = message.title;
+              var description = message.description;
+              var faviconUrl = message.faviconUrl;
+
+              var iFrameUrlPartTmp = lastUrlPosted = message.url;
+              if(!iFrameUrlPartTmp) {
+                return
+              }
+
+              if(message.isReplaceHref) {
+                loc.href = iFrameUrlPartTmp.replace(/^\/\//g, 'http://');
+              } else {
+
+                doc.title = title;
+
+                // https://www.example.com/a/b/c/#Main
+                // =>
+                // www.example.com/a/b/c//--WC-Main
+                var iFrameUrlPart = iFrameUrlPartTmp.replace(enforceProtocol, '').replace('#', hashPlaceholder);
+
+                updateUrl(iFrameUrlPart);
+
+                if(message.imgSrc) {
+                  featured.src = message.imgSrc;
+                }
+                if(description) {
+                  doc.getElementById('wechat_summary').innerText = description;
+                }
+                if(faviconUrl) {
+                  favicon.setAttribute('href', faviconUrl);
+                }
+              }
+
+            }
+              break;
+
+            case 'beforeunload': {
+              showElement(unload);
+              websiteTitle.innerText = message.targetTitle;
+              var targetTitleExtra = message.targetTitleExtra;
+              websiteTitleExtra.innerText = getSEOArticleTitleFromUrl(targetTitleExtra);
+              // slideDownElement(loading);
+              slideDownElement(loading);
+
+              reload(targetTitleExtra);
+
+              setTimeout(function() {
+                loc.reload();
+              }, 200)
+            }
+              break;
+
+            case 'unload': {
+              isConnected = false;
+            }
+              break;
+          }
 
         });
 
-
-        doc.addEventListener(loadingIFrameEventName, function (e) {
-            updateIFrameByUrl();
+        doc.addEventListener(loadingIFrameEventName, function(e) {
+          updateIFrameByUrl();
         }, false);
 
-        doc.addEventListener("DOMContentLoaded", function () {
-            doc.dispatchEvent(loadingIFrameEvent);
-            updateLoading();
+        doc.addEventListener("DOMContentLoaded", function() {
+          doc.dispatchEvent(loadingIFrameEvent);
+          updateLoading();
 
         });
 
-        win.addEventListener('popstate', function (e) {
-            var iframeWin = iframe.contentWindow;
+        win.addEventListener('popstate', function(e) {
+          var iframeWin = iframe.contentWindow;
 
-            if (!iframeWin) return;
+          if(!iframeWin) {
+            return;
+          }
 
-            iframeWin.postMessage({
-                type: 'updateIFrameUrlByState',
-                url: getIFrameUrl()
-            }, '*');
+          iframeWin.postMessage({
+                                  type: 'updateIFrameUrlByState',
+                                  url: getIFrameUrl()
+                                }, '*');
         }, false);
 
         function convertHasTagToHistoryState() {
-            // https://OWNER.github.io/example.com/#https://www.example.com/a/b/c/--WC--Main
-            // =>
-            // www.example.com/a/b/c#Main
-            var iFrameUrlPart = decodeURI(loc.hash.replace(/^#/, '').replace(enforceProtocol, ''));
+          // https://OWNER.github.io/example.com/#https://www.example.com/a/b/c/--WC--Main
+          // =>
+          // www.example.com/a/b/c#Main
+          var iFrameUrlPart = decodeURI(loc.hash.replace(/^#/, '').replace(enforceProtocol, ''));
 
-            if (iFrameUrlPart.length > 3) {
-                updateUrl(iFrameUrlPart)
-            }
+          if(iFrameUrlPart.length > 3) {
+            updateUrl(iFrameUrlPart)
+          }
         }
 
         function getIFrameUrlFromPart(iFrameUrlPart) {
-            return enforceProtocol + iFrameUrlPart.replace(hashPlaceholderRexExp, '#');
+          return enforceProtocol + iFrameUrlPart.replace(hashPlaceholderRexExp, '#');
         }
 
         function updateUrl(iFrameUrlPart) {
-            //iFrameUrlPart: www.example.com/a/b/c//--WC-Main
+          //iFrameUrlPart: www.example.com/a/b/c//--WC-Main
 
-            var iframeWin = iframe.contentWindow;
+          var iframeWin = iframe.contentWindow;
 
-            if (!iframeWin) return;
+          if(!iframeWin) {
+            return;
+          }
 
-            var iFrameUrl = '/' + repoNameAsWebsiteHost + '/' + iFrameUrlPart;
+          var iFrameUrl = '/' + repoNameAsWebsiteHost + '/' + iFrameUrlPart;
 
-            // handle hash tag
-            history.pushState({}, "", iFrameUrl);
+          // handle hash tag
+          history.pushState({}, "", iFrameUrl);
 
-            setTimeout(function () {
-                var lastIFrameUrl = localStorage.getItem('lastIFrameUrl');
-                var lastIFrameUrlDateTime = localStorage.getItem('lastIFrameUrlDateTime');
+          setTimeout(function() {
+            var lastIFrameUrl = localStorage.getItem('lastIFrameUrl');
+            var lastIFrameUrlDateTime = localStorage.getItem('lastIFrameUrlDateTime');
 
-                var IFrameUrlDateTime = new Date().valueOf();
+            var IFrameUrlDateTime = new Date().valueOf();
 
-                localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
+            localStorage.setItem('lastIFrameUrlDateTime', IFrameUrlDateTime);
 
-                localStorage.setItem('lastIFrameUrl', iFrameUrl);
+            localStorage.setItem('lastIFrameUrl', iFrameUrl);
 
+            if(lastIFrameUrl !== iFrameUrl && iFrameUrl && iFrameUrl.length > 10) {
 
-                if (lastIFrameUrl !== iFrameUrl && iFrameUrl && iFrameUrl.length > 10) {
+              // never reload on before 7 secs of first iframe sending Connected
+              if(firstConnectedTime
+                 && IFrameUrlDateTime > firstConnectedTime + 7000
+                 && lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
 
-                    // never reload on before 7 secs of first iframe sending Connected
-                    if (firstConnectedTime
-                        && IFrameUrlDateTime > firstConnectedTime + 7000
-                        && lastIFrameUrlDateTime && (+lastIFrameUrlDateTime) + 3000 < IFrameUrlDateTime) {
+                loc.reload();
+              }
 
-                        loc.reload();
-                    }
-
-                }
-            }, 10)
+            }
+          }, 10)
         }
 
         function updateIFrameByUrl() {
 
-            var urlToJumpTo = getIFrameUrl();
+          var urlToJumpTo = getIFrameUrl();
 
-            if (iframe.src != urlToJumpTo) {
-                iframe.src = urlToJumpTo;
-            }
+          if(iframe.src != urlToJumpTo) {
+            iframe.src = urlToJumpTo;
+          }
 
-            [].forEach.call(doc.querySelectorAll('.website-host'), function (hostDiv) {
-                hostDiv.innerText = getSEOArticleTitleFromUrl(urlToJumpTo);
-            });
+          [].forEach.call(doc.querySelectorAll('.website-host'), function(hostDiv) {
+            hostDiv.innerText = getSEOArticleTitleFromUrl(urlToJumpTo);
+          });
 
         }
 
         function getIFrameUrl() {
 
-            var iFrameUrlPart, path;
+          var iFrameUrlPart, path;
 
-            //OWNER.github.com/example.com/sub1.example.com/a/b/c/--WC--section1 => example.com/sub1.example.com/a/b/c/--WC--section1
-            // =>
-            // example.com/sub1.example.com/a/b/c/--WC--section1 => sub1.example.com/a/b/c/--WC--section1
-            path = loc.pathname.replace(/^\//, '');
-            // sub1.example.com/a/b/c/--WC--section1
-            iFrameUrlPart = path.replace(repoNameAsWebsiteHost, '');
+          //OWNER.github.com/example.com/sub1.example.com/a/b/c/--WC--section1 => example.com/sub1.example.com/a/b/c/--WC--section1
+          // =>
+          // example.com/sub1.example.com/a/b/c/--WC--section1 => sub1.example.com/a/b/c/--WC--section1
+          path = loc.pathname.replace(/^\//, '');
+          // sub1.example.com/a/b/c/--WC--section1
+          iFrameUrlPart = path.replace(repoNameAsWebsiteHost, '');
 
-            // downward compatible with github.com/OWNER/example.com -> www.example.com
-            var prefix = repoNameAsWebsiteHost.split('.').length > 2 ? enforceProtocol : enforceProtocol + 'www.';
-            var urlToJumpTo = prefix + repoNameAsWebsiteHost;
+          // downward compatible with github.com/OWNER/example.com -> www.example.com
+          var prefix = repoNameAsWebsiteHost.split('.').length > 2 ? enforceProtocol : enforceProtocol + 'www.';
+          var urlToJumpTo = prefix + repoNameAsWebsiteHost;
 
-            if (iFrameUrlPart && iFrameUrlPart.length > 5) {
-                var iframeUrl = getIFrameUrlFromPart(iFrameUrlPart);
-                if (iframe.src != iframeUrl && lastUrlPosted !== iframeUrl) {
-                    urlToJumpTo = iframeUrl;
-                }
+          if(iFrameUrlPart && iFrameUrlPart.length > 5) {
+            var iframeUrl = getIFrameUrlFromPart(iFrameUrlPart);
+            if(iframe.src != iframeUrl && lastUrlPosted !== iframeUrl) {
+              urlToJumpTo = iframeUrl;
             }
+          }
 
-            return urlToJumpTo;
+          return urlToJumpTo;
         }
 
         function updateLoading() {
-            globalLoadingTimeout = setTimeout(function () {
-                loadingDefault.style.display = 'none';
-                loadingLonger.style.display = 'block';
+          globalLoadingTimeout = setTimeout(function() {
+            loadingDefault.style.display = 'none';
+            loadingLonger.style.display = 'block';
 
-                globalLoadingTimeout = setTimeout(function () {
-                    loadingLonger.style.display = 'none';
-                    loadingFailure.style.display = 'block';
-                    globalLoadingTimeout = setTimeout(function () {
-                        loadingFailure.style.display = 'none'
-                    }, 5000)
-                }, 8000)
-            }, 7000)
+            globalLoadingTimeout = setTimeout(function() {
+              loadingLonger.style.display = 'none';
+              loadingFailure.style.display = 'block';
+              globalLoadingTimeout = setTimeout(function() {
+                loadingFailure.style.display = 'none'
+              }, 5000)
+            }, 8000)
+          }, 7000)
         }
 
         function ensureUrlUpdated() {
-            var iframeWin = iframe.contentWindow;
+          var iframeWin = iframe.contentWindow;
 
-            if (!iframeWin) return;
+          if(!iframeWin) {
+            return;
+          }
 
-            iframeWin.postMessage({
-                type: 'wechat_unblocker'
-            }, '*');
+          iframeWin.postMessage({
+                                  type: 'wechat_unblocker'
+                                }, '*');
 
         }
 
         function hideElement() {
-            [].forEach.call(arguments, function (elem) {
-                elem.style.display = 'none';
-            });
+          [].forEach.call(arguments, function(elem) {
+            elem.style.display = 'none';
+          });
         }
 
         function showElement(elem) {
-            [].forEach.call(arguments, function (elem) {
-                elem.style.display = 'block';
-            });
+          [].forEach.call(arguments, function(elem) {
+            elem.style.display = 'block';
+          });
         }
 
         function slideUpElement(elem) {
-            elem.style.transform = 'translate(0px, -100px)';
-            elem.style.opacity = 0.5;
-            setTimeout(function () {
-                hideElement(elem)
-            }, 1000);
+          elem.style.transform = 'translate(0px, -100px)';
+          elem.style.opacity = 0.5;
+          setTimeout(function() {
+            hideElement(elem)
+          }, 1000);
         }
 
         function slideDownElement(elem) {
-            showElement(elem);
+          showElement(elem);
 
-            elem.style.transform = 'translate(0px, 0px)';
-            elem.style.opacity = 1;
+          elem.style.transform = 'translate(0px, 0px)';
+          elem.style.opacity = 1;
         }
 
         function reload(url) {
 
-            if (url && url.length > 10) {
+          if(url && url.length > 10) {
 
-                // https://www.example.com/a/b/c/#Main
-                // =>
-                // www.example.com/a/b/c//--WC-Main
-                var iFrameUrlPart = url.replace(enforceProtocol, '').replace('#', hashPlaceholder);
+            // https://www.example.com/a/b/c/#Main
+            // =>
+            // www.example.com/a/b/c//--WC-Main
+            var iFrameUrlPart = url.replace(enforceProtocol, '').replace('#', hashPlaceholder);
 
-                updateUrl(iFrameUrlPart);
-            }
+            updateUrl(iFrameUrlPart);
+          }
         }
 
         function getSEOArticleTitleFromUrl(url) {
-            url = url || '';
-            var handledUrl = url.split('/').reverse().reduce(function (previousValue, currentValue) {
-                // you should set your title in path
-                currentValue = decodeURIComponent(currentValue);
+          url = url || '';
+          var handledUrl = url.split('/').reverse().reduce(function(previousValue, currentValue) {
+            // you should set your title in path
+            currentValue = decodeURIComponent(currentValue);
 
-                if (currentValue && currentValue.length > 5 && currentValue.length > previousValue.length) {
-                    return currentValue;
-                } else {
-                    return previousValue
-                }
+            if(currentValue && currentValue.length > 5 && currentValue.length > previousValue.length) {
+              return currentValue;
+            } else {
+              return previousValue
+            }
 
-            }, '');
+          }, '');
 
-            return handledUrl && /[\u4E00-\u9FA5]+/.test(handledUrl) ? handledUrl : url
+          return handledUrl && /[\u4E00-\u9FA5]+/.test(handledUrl) ? handledUrl : url
         }
-    })()
 
+        function jumpOutOfIframeOnNoWechat() {
+          if(!isWeixin()) {
+            location.replace(getIFrameUrl())
+          }
+        }
 
-</script>
+        function isWeixin() { //判断是否是微信
+          var ua = navigator.userAgent.toLowerCase();
+          doc.querySelector('#user-agent').innerText = ua;
+          return !!ua.match(/MicroMessenger/i);
+        }
+      })()
 
-</body>
+    </script>
+
+  </body>
 </html>
