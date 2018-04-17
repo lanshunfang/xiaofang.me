@@ -186,8 +186,9 @@
                 if(message.imgSrc) {
                   featured.src = message.imgSrc;
                 }
-                if(description) {
-                  doc.getElementById('wechat_summary').innerText = description;
+                var wcSummary = doc.getElementById('wechat_summary');
+                if(description && wcSummary) {
+                  wcSummary.innerText = description;
                 }
                 if(faviconUrl) {
                   favicon.setAttribute('href', faviconUrl);
@@ -429,7 +430,6 @@
 
         function isWeixin() { //判断是否是微信
           var ua = navigator.userAgent.toLowerCase();
-          doc.querySelector('#user-agent').innerText = ua;
           return !!ua.match(/MicroMessenger/i);
         }
       })()
